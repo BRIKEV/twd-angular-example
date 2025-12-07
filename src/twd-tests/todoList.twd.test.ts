@@ -85,6 +85,7 @@ describe("Todo List Page", () => {
     });
 
     const todoList = await screenDom.getAllByText(/Learn TWD|Build Todo App|Test Todo/);
+    console.log(todoList);
     expect(todoList).to.have.length(1);
   });
 

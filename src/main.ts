@@ -10,6 +10,11 @@ if (isDevMode()) {
     './twd-tests/todoList.twd.test.ts': () => import('./twd-tests/todoList.twd.test'),
   };
   initTWD(tests);
+  const { createBrowserClient } = await import('twd-relay/browser');
+  const client = createBrowserClient({
+    url: 'ws://localhost:9876/__twd/ws',
+  });
+  client.connect();
 }
 
 bootstrapApplication(App, appConfig)

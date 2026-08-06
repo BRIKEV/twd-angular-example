@@ -62,7 +62,38 @@ Or alternatively:
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed. TWD testing code will be tree-shaken and removed from production builds.
+This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+### Keeping TWD out of production builds
+
+TWD is not tree-shaken automatically. It is excluded by a build-time constant, `TWD_ENABLED`, injected through the `define` option in `angular.json`:
+
+```jsonc
+"build": {
+  "options": {
+    "define": { "TWD_ENABLED": "false" }   // default: off
+  },
+  "configurations": {
+    "development": {
+      "define": { "TWD_ENABLED": "true" }  // opt in for dev only
+    }
+  }
+}
+```
+
+Because `TWD_ENABLED` is a literal by the time esbuild sees it, the whole `if` block in `src/main.ts` is dead-code eliminated and none of its lazy chunks are emitted. Measured in this repo:
+
+| `src/main.ts` guard | `dist/.../browser` | JS chunks |
+|---|---|---|
+| `if (isDevMode())` | 912 K | 10 |
+| `if (typeof TWD_ENABLED !== 'undefined' && TWD_ENABLED)` | 332 K | 2 |
+
+`isDevMode()` is a *function call*, so esbuild cannot prove the branch is dead. It keeps the branch and emits every `await import()` inside it as a lazy chunk — around 580 K of `twd-js` (including a copy of React) that the browser never fetches, because `isDevMode()` returns `false` at runtime. It is dead weight in the deployed artifact rather than a performance bug, and it is easy to miss: the *initial* bundle grows by only ~1 kB, so budgets and Lighthouse stay quiet.
+
+Two details worth keeping:
+
+- **Default `TWD_ENABLED` to `"false"`** in `options` and opt in under `development`, so a configuration added later cannot silently ship TWD.
+- **Keep the `typeof` check.** A bare `if (TWD_ENABLED)` throws `TWD_ENABLED is not defined` at module scope if the `define` is ever missing — before `bootstrapApplication` runs, so the page renders nothing. The `typeof` form boots normally and just logs a warning.
 
 ## Running Tests with TWD
 

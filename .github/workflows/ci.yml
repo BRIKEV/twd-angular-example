@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,9 +27,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Start Vite dev server
+      - name: Start mock API
         run: |
-          nohup npm run start > vite.log 2>&1 &
+          nohup npm run serve > json-server.log 2>&1 &
+          npx wait-on http://localhost:3001/api/todos
+
+      - name: Start Angular dev server
+        run: |
+          nohup npm run start > ng.log 2>&1 &
           npx wait-on http://localhost:4200
         env:
           CI: true
@@ -34,4 +43,3 @@ jobs:
         uses: BRIKEV/twd-cli/.github/actions/run@main
         with:
           contract-report: 'true'
-

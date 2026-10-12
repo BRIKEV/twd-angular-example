@@ -11,7 +11,8 @@
     "serve:dev": "npm-run-all --parallel serve start",
     "relay": "npx twd-relay run --port 9876",
     "relay:serve": "npx twd-relay serve --port 9876",
-    "test:ci": "npx twd-cli run"
+    "test:ci": "npx twd-cli run",
+    "lint:twd": "twd-lint"
   },
   "prettier": {
     "printWidth": 100,
@@ -50,6 +51,7 @@
     "tailwindcss": "^4.1.18",
     "twd-cli": "1.10.0",
     "twd-js": "1.10.1",
+    "twd-lint": "1.0.0",
     "twd-relay": "1.4.0",
     "typescript": "~5.9.3",
     "vitest": "^4.0.16"

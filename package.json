@@ -55,5 +55,10 @@
     "twd-relay": "1.4.0",
     "typescript": "~5.9.3",
     "vitest": "^4.0.16"
+  },
+  "overrides": {
+    "twd-relay": {
+      "twd-js": "$twd-js"
+    }
   }
 }
